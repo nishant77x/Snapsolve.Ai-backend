@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
+
 *{
 margin:0;
 padding:0;
@@ -151,7 +152,9 @@ margin-right:auto;
 }
 
 @keyframes spin{
-100%{transform:rotate(360deg);}
+100%{
+transform:rotate(360deg);
+}
 }
 
 .subjects{
@@ -189,7 +192,19 @@ width:100%;
 margin-bottom:12px;
 }
 
+#language{
+width:100%;
+padding:14px;
+margin-top:20px;
+border-radius:12px;
+background:#111625;
+color:white;
+border:1px solid #23283b;
+font-size:16px;
+}
+
 @media(max-width:900px){
+
 .main{
 flex-direction:column;
 }
@@ -207,7 +222,9 @@ gap:12px;
 flex-wrap:wrap;
 justify-content:center;
 }
+
 }
+
 </style>
 </head>
 
@@ -216,7 +233,10 @@ justify-content:center;
 <div class="container">
 
 <nav class="navbar">
-<div class="logo">SnapSolve<span>AI</span></div>
+
+<div class="logo">
+SnapSolve<span>AI</span>
+</div>
 
 <ul>
 <li class="active">Home</li>
@@ -228,18 +248,26 @@ justify-content:center;
 <div class="nav-btn">
 <button>👑 Upgrade</button>
 </div>
+
 </nav>
 
 <div class="main">
 
 <div class="left-panel">
 
-<h1>Upload a Question,<br>Get <span>Answers</span></h1>
+<h1>
+Upload a Question,<br>
+Get <span>Answers</span>
+</h1>
 
-<p>Snap, upload and get instant AI solutions.</p>
+<p>
+Snap, upload and get instant AI solutions.
+</p>
 
 <div class="upload-box">
+
 <i class="fa-solid fa-cloud-arrow-up"></i>
+
 <p>Choose your question image</p>
 
 <input type="file" id="fileInput" accept="image/*" hidden>
@@ -251,6 +279,7 @@ Choose Image
 <img id="preview">
 
 <div class="loader" id="loader"></div>
+
 </div>
 
 <div class="subjects">
@@ -261,9 +290,17 @@ Choose Image
 <button>English</button>
 </div>
 
+<select id="language">
+<option value="English">🇺🇸 English</option>
+<option value="Hindi">🇮🇳 Hindi</option>
+<option value="Marathi">🇮🇳 Marathi</option>
+</select>
+
 <div class="solution-box">
 <h3>Solution</h3>
-<p id="answerText">Upload image and AI answer will appear here.</p>
+<p id="answerText">
+Upload image and AI answer will appear here.
+</p>
 </div>
 
 </div>
@@ -287,8 +324,77 @@ Choose Image
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="script.js"></script>
+<script>
+
+let fileInput = document.getElementById("fileInput");
+let preview = document.getElementById("preview");
+let loader = document.getElementById("loader");
+let answer = document.getElementById("answerText");
+let language = document.getElementById("language");
+
+fileInput.onchange = async function () {
+
+let file = this.files[0];
+
+if(file){
+
+preview.src = URL.createObjectURL(file);
+preview.style.display = "block";
+
+loader.style.display = "block";
+
+answer.innerHTML = "Solving with AI...";
+
+try{
+
+let formData = new FormData();
+
+formData.append("image", file);
+
+formData.append("language", language.value);
+
+let res = await fetch(
+"https://snapsolveai-backend-production.up.railway.app/solve",
+{
+method:"POST",
+body:formData
+}
+);
+
+let data = await res.json();
+
+loader.style.display = "none";
+
+if(data.success){
+
+answer.innerHTML = `
+<h3>Solution (${language.value})</h3>
+<p>${data.answer}</p>
+`;
+
+}else{
+
+answer.innerHTML = `
+<p>AI Error: ${data.message}</p>
+`;
+
+}
+
+}catch(err){
+
+loader.style.display = "none";
+
+answer.innerHTML = `
+<p>Error: ${err.message}</p>
+`;
+
+}
+
+}
+
+};
+
+</script>
 
 </body>
-</html>
+  </html>
