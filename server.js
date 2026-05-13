@@ -73,7 +73,7 @@ Supported Languages:
     const response = await axios.post(
       "https://api.deepseek.com/chat/completions",
       {
-        model: "deepseek-chat",
+        model: "deepseek-vision",
         messages: [
           {
             role: "user",
