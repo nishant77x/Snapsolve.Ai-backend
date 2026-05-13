@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SnapSolve AI</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#05070d;
+color:white;
+padding:20px;
+overflow-x:hidden;
+}
+
+.container{
+max-width:1400px;
+margin:auto;
+}
+
+.navbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:18px 25px;
+background:#0b0f1a;
+border:1px solid #1b2030;
+border-radius:18px;
+margin-bottom:20px;
+}
+
+.logo{
+font-size:32px;
+font-weight:bold;
+}
+
+.logo span{
+color:#8a3ffc;
+}
+
+.navbar ul{
+display:flex;
+gap:25px;
+list-style:none;
+color:#aaa;
+}
+
+.navbar li.active{
+color:#8a3ffc;
+}
+
+.nav-btn button{
+background:#8a3ffc;
+border:none;
+padding:12px 18px;
+border-radius:12px;
+color:white;
+cursor:pointer;
+}
+
+.main{
+display:flex;
+gap:20px;
+}
+
+.left-panel,.right-panel{
+background:#0b0f1a;
+padding:30px;
+border-radius:20px;
+border:1px solid #1a1f2b;
+}
+
+.left-panel{
+flex:2;
+}
+
+.right-panel{
+flex:1;
+}
+
+.left-panel h1{
+font-size:52px;
+line-height:1.1;
+margin-bottom:15px;
+}
+
+.left-panel span{
+color:#8a3ffc;
+}
+
+.left-panel p{
+color:#9aa0b5;
+margin-bottom:20px;
+font-size:20px;
+}
+
+.upload-box{
+border:2px dashed #2a2f45;
+padding:45px;
+text-align:center;
+border-radius:18px;
+background:#090d18;
+}
+
+.upload-box i{
+font-size:55px;
+color:#8a3ffc;
+margin-bottom:15px;
+}
+
+.upload-box button{
+margin-top:15px;
+background:linear-gradient(45deg,#7a2cff,#b14dff);
+border:none;
+padding:14px 28px;
+color:white;
+border-radius:12px;
+font-size:18px;
+cursor:pointer;
+}
+
+#preview{
+width:100%;
+max-height:250px;
+object-fit:contain;
+margin-top:15px;
+border-radius:14px;
+display:none;
+}
+
+.loader{
+display:none;
+margin-top:15px;
+border:4px solid #222;
+border-top:4px solid #8a3ffc;
+border-radius:50%;
+width:35px;
+height:35px;
+animation:spin 1s linear infinite;
+margin-left:auto;
+margin-right:auto;
+}
+
+@keyframes spin{
+100%{transform:rotate(360deg);}
+}
+
+.subjects{
+display:flex;
+gap:10px;
+margin-top:20px;
+flex-wrap:wrap;
+}
+
+.subjects button,
+.right-panel button{
+background:#111625;
+border:1px solid #23283b;
+color:white;
+padding:12px 16px;
+border-radius:12px;
+cursor:pointer;
+}
+
+.solution-box,.chat-box{
+margin-top:20px;
+background:#090d18;
+padding:20px;
+border-radius:16px;
+border:1px solid #20263a;
+}
+
+.right-panel h2{
+margin-bottom:15px;
+font-size:30px;
+}
+
+.right-panel button{
+width:100%;
+margin-bottom:12px;
+}
+
+@media(max-width:900px){
+.main{
+flex-direction:column;
+}
+
+.left-panel h1{
+font-size:38px;
+}
+
+.navbar{
+flex-direction:column;
+gap:12px;
+}
+
+.navbar ul{
+flex-wrap:wrap;
+justify-content:center;
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<nav class="navbar">
+<div class="logo">SnapSolve<span>AI</span></div>
+
+<ul>
+<li class="active">Home</li>
+<li>Solutions</li>
+<li>Subjects</li>
+<li>Pricing</li>
+</ul>
+
+<div class="nav-btn">
+<button>👑 Upgrade</button>
+</div>
+</nav>
+
+<div class="main">
+
+<div class="left-panel">
+
+<h1>Upload a Question,<br>Get <span>Answers</span></h1>
+
+<p>Snap, upload and get instant AI solutions.</p>
+
+<div class="upload-box">
+<i class="fa-solid fa-cloud-arrow-up"></i>
+<p>Choose your question image</p>
+
+<input type="file" id="fileInput" accept="image/*" hidden>
+
+<button onclick="document.getElementById('fileInput').click()">
+Choose Image
+</button>
+
+<img id="preview">
+
+<div class="loader" id="loader"></div>
+</div>
+
+<div class="subjects">
+<button>Maths</button>
+<button>Physics</button>
+<button>Chemistry</button>
+<button>Biology</button>
+<button>English</button>
+</div>
+
+<div class="solution-box">
+<h3>Solution</h3>
+<p id="answerText">Upload image and AI answer will appear here.</p>
+</div>
+
+</div>
+
+<div class="right-panel">
+
+<h2>🤖 AI Tutor</h2>
+
+<div class="chat-box">
+<p>Hello! Upload question and I'll solve it.</p>
+</div>
+
+<button>Explain in simple words</button>
+<button>Give another method</button>
+<button>Translate in Hindi</button>
+<button>Important formula?</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
