@@ -2,44 +2,71 @@ let fileInput = document.getElementById("fileInput");
 let preview = document.getElementById("preview");
 let loader = document.getElementById("loader");
 let answer = document.getElementById("answerText");
+let language = document.getElementById("language");
 
 fileInput.onchange = async function () {
 
-let file = this.files[0];
+  let file = this.files[0];
 
-if(file){
+  if (file) {
 
-preview.src = URL.createObjectURL(file);
-preview.style.display = "block";
+    // Image Preview
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
 
-loader.style.display = "block";
-answer.innerHTML = "Reading image...";
+    // Loading
+    loader.style.display = "block";
 
-try{
+    answer.innerHTML = "Solving with AI...";
 
-const { data:{ text } } = await Tesseract.recognize(file,"eng");
+    try {
 
-answer.innerHTML = "Solving...";
+      // Form Data
+      let formData = new FormData();
 
-let res = await fetch("https://ominous-eureka-4q7ggw9grq5w3j4rp-3000.app.github.dev/solve",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body: JSON.stringify({
-question:text
-})
-});
+      formData.append("image", file);
 
-let data = await res.json();
+      formData.append("language", language.value);
 
-loader.style.display = "none";
-answer.innerHTML = data.answer;
+      // Backend Request
+      let res = await fetch(
+        "https://snapsolveai-backend-production.up.railway.app/solve",
+        {
+          method: "POST",
+          body: formData
+        }
+      );
 
-}catch(err){
-loader.style.display = "none";
-answer.innerHTML = "Error: " + err;
-}
+      let data = await res.json();
 
-}
+      loader.style.display = "none";
+
+      // Success
+      if (data.success) {
+
+        answer.innerHTML = `
+        <h3>Solution (${language.value})</h3>
+        <p>${data.answer}</p>
+        `;
+
+      } else {
+
+        answer.innerHTML = `
+        <p>AI Error: ${data.message}</p>
+        `;
+
+      }
+
+    } catch (err) {
+
+      loader.style.display = "none";
+
+      answer.innerHTML = `
+      <p>Error: ${err.message}</p>
+      `;
+
+    }
+
+  }
+
 };
