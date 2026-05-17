@@ -1,13 +1,14 @@
 {
-  "name": "snapsolve-backend",
+  "name": "snapsolve-ai-backend",
   "version": "1.0.0",
+  "description": "SnapSolve AI Backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-  "engines": {
-    "node": "20.x"
-  },
+  "keywords": [],
+  "author": "Nishant",
+  "license": "ISC",
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "cors": "^2.8.5",
