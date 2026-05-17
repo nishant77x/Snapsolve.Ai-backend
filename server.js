@@ -3,24 +3,17 @@ const cors = require("cors");
 const multer = require("multer");
 const dotenv = require("dotenv");
 const fs = require("fs");
-
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 dotenv.config();
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
 // Gemini Setup
-const genAI = new GoogleGenerativeAI(
-  process.env.GEMINI_API_KEY
-);
-
-const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash"
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // Upload folder
 if (!fs.existsSync("uploads")) {
@@ -29,15 +22,9 @@ if (!fs.existsSync("uploads")) {
 
 // Multer setup
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
-
 const upload = multer({ storage });
 
 // Home Route
@@ -48,20 +35,19 @@ app.get("/", (req, res) => {
 // Solve Route
 app.post("/solve", upload.single("image"), async (req, res) => {
 
-  try {
+  let filePath = null;
 
+  try {
     const language = req.body.language || "English";
 
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "No image uploaded",
-      });
+      return res.status(400).json({ success: false, message: "No image uploaded" });
     }
 
-    // Read image
-    const imageBuffer = fs.readFileSync(req.file.path);
+    filePath = req.file.path;
 
+    // Read image
+    const imageBuffer = fs.readFileSync(filePath);
     const base64Image = imageBuffer.toString("base64");
 
     // Prompt
@@ -85,50 +71,44 @@ Supported Languages:
 - Marathi
 `;
 
-    // Gemini Request
+    // ✅ Fixed Gemini call
     const result = await model.generateContent([
-
       prompt,
-
       {
         inlineData: {
           mimeType: req.file.mimetype,
           data: base64Image,
         },
       },
-
     ]);
 
-    const response = await result.response;
-
-    const answer = response.text();
+    // ✅ Fixed response extraction
+    const answer = result.response.text();
 
     // Delete uploaded image
-    fs.unlinkSync(req.file.path);
+    fs.unlinkSync(filePath);
 
-    // Send answer
-    res.json({
-      success: true,
-      answer,
-    });
+    res.json({ success: true, answer });
 
   } catch (error) {
 
-    console.log(error);
+    console.error("Gemini Error:", error);
+
+    // ✅ Always clean up file on error too
+    if (filePath && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
 
     res.status(500).json({
       success: false,
       message: "AI solving failed",
       error: error.message,
     });
-
   }
-
 });
 
 // Start Server
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
